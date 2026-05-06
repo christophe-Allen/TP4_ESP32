@@ -19,14 +19,14 @@ sta.disconnect()
 e = espnow.ESPNow()
 e.active(True)
 
-peer_bcast = b'\xff' * 6
+peer_bcast = b'\xff\xff\xff\xff\xff\xff'
 e.add_peer(peer_bcast)
 
 # Variables d'état
 last_S1 = 1 # Boutons en Pull-up (repos à 1)
 last_S2 = 1
 led_val = 0 # LED D1 sur le devkit
-color_index = 0 # index de la coueur de la LED RGB
+color_index = 0 # index de la couleur de la LED RGB
 colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1)] # tableau des couleurs RGB
 
 is_remote_mode = False # Variable pour le mode de fonctionnement
@@ -64,9 +64,9 @@ while True:
         last_rx_time = now 
         is_remote_mode = True
         
-        # Action : Seulement si l'autre a appuyé sur S2
-        if msg == b'CHANGE_COLOR':
-            color_index = (color_index + 1) % len(colors)
+    # Action : Seulement si l'autre a appuyé sur S2
+    if msg == b'CHANGE_COLOR':
+        color_index = (color_index + 1) % len(colors)
     
     # fonctionnement en mode remote
     if is_remote_mode:
@@ -116,3 +116,4 @@ while True:
     last_S1 = current_S1    
     last_S2 = current_S2
     time.sleep_ms(1)
+
