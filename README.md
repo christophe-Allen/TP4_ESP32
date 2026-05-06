@@ -13,7 +13,7 @@
 ## Code C
 En C j'ai seulement utilisé la librairie arduino.
 
-Grace à la fonction pinMode on peut changer nos IOs en entréées ou en sortie
+Grace à la fonction pinMode on peut changer nos IOs en entrées ou en sortie
 <img width="299" height="75" alt="image" src="https://github.com/user-attachments/assets/b48af25a-7e87-4627-ba18-4c72a5714713" />
 
 Pour lire nos entrées configurer la fonction digitalread est utiliseé
@@ -28,3 +28,14 @@ et pour la LED RGB la fonction neaopixelWrite
 
 ## Code MicroPython
 
+### ESP NOW
+La librairie ESP_NOW permet aux esp de communiquer. La communication se fait via WIFI en WLAN et n'as pas besoin de routeur WIFI. Les esp communique directment entre eux
+(mode point à point).
+
+### Mode Remote
+Pour savoir si on doit passer ou rester dans le mode remote, l'esp envoi toute les secondes un message spécifique à tout les esp actif mais seul l'esp avce le un filtre 
+du même message passera en mode remote. Si la connexion est perdu pendant 2s on passera automatiquement en mode local. 
+
+Pour le changeement de couleur l'envoi d'un ordre est fait quand on appuie sur le bouton S2
+
+### Mode Local
