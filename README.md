@@ -29,13 +29,17 @@ et pour la LED RGB la fonction neopixelWrite
 ## Code MicroPython
 
 ### ESP NOW
-La librairie ESP_NOW permet aux esp de communiquer. La communication se fait via WIFI en WLAN et n'as pas besoin de routeur WIFI. Les esp communique directment entre eux
-(mode point à point).
+La librairie ESP_NOW permet aux esp de communiquer. La communication se fait via WIFI en WLAN et n'as pas besoin de routeur WIFI. Les esp communique directment entre eux c'est du 
+point à point.
+L'esp envoi toute les secondes un message spécifique à tout les esp actif.
 
 ### Mode Remote
-Pour savoir si on doit passer ou rester dans le mode remote, l'esp envoi toute les secondes un message spécifique à tout les esp actif mais seul l'esp avec le bon filtre 
-passera en mode remote. Si la connexion est perdu pendant 2s on passera automatiquement en mode local. 
-
-Pour le changement de couleur, l'envoi d'un ordre qui est fait quand on appuie sur le bouton S2
+le bouton S2 des esp32 change la LED RGB avec l'envoi d'un autre message quand on appuie sur le bouton à l'autre carte et les 2 LED clignotent à 2Hz.
+Si la connexion est perdu pendant 2s on passera automatiquement en mode local. 
 
 ### Mode Local
+Dans ce mode le bouton S2 change la couleur de sa LED.
+Pour passer dans le mode remote, il faut un autre esp avec comme filtre le message envoyer par l'autre esp.
+
+
+le bouton S1 change l'état de la LED D1 dans les 2 modes.
