@@ -22,8 +22,8 @@ e.active(True)
 peer_bcast = b'\xff\xff\xff\xff\xff\xff'
 e.add_peer(peer_bcast)
 
-FILTER = b"CAH_TP4"
-CMD_COLOR = b'CHANGE_COLOR'
+FILTER = b"CAH_TP4" 		#b = objet de type bytes
+CMD_COLOR = b"CHANGE_COLOR"
 
 # Variables d'état
 last_S1 = 1 # Boutons en Pull-up (repos à 1)
