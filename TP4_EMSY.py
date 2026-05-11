@@ -22,6 +22,9 @@ e.active(True)
 peer_bcast = b'\xff\xff\xff\xff\xff\xff'
 e.add_peer(peer_bcast)
 
+FILTER = b"CAH_TP4"
+CMD_COLOR = b'CHANGE_COLOR'
+
 # Variables d'état
 last_S1 = 1 # Boutons en Pull-up (repos à 1)
 last_S2 = 1
@@ -42,78 +45,76 @@ connection_timeout = 2000 # Retour au mode local après 2s sans signal
 rgb[0] = (0, 0, 0)
 rgb.write()
 
-while True:
-    now = time.ticks_ms()
-    # lecture des valeurs des boutons
-    current_S1 = BTN_S1.value()
-    current_S2 = BTN_S2.value()
+if __name__ == "__main__":
+    try:
+        while True:
+            now = time.ticks_ms()
+            # lecture des valeurs des boutons
+            current_S1 = BTN_S1.value()
+            current_S2 = BTN_S2.value()
     
-    # Signal de présence
-    # Envoi automatique toutes les secondes pour détecter un autre esp
-    if time.ticks_diff(now, last_send_time) > 1000:
-        try:
-            # False = n'attend pas une réponse si aucun esp répond
-            e.send(peer_bcast, b"CAH_TP4", False)
-        except OSError:
-            pass
-        last_send_time = now
+            # Signal de présence
+            if time.ticks_diff(now, last_send_time) > 1000:
+                try:
+                    e.send(peer_bcast, FILTER, False)
+                except OSError:
+                    pass
+                last_send_time = now
     
-    # Réception du message d'identification
-    host, msg = e.recv(0)
-    if msg == b"CAH_TP4":
-        last_rx_time = now 
-        is_remote_mode = True
+            # Réception du message d'identification
+            host, msg = e.recv(0)
+            if msg == FILTER:
+                last_rx_time = now 
+                is_remote_mode = True
         
-    # Action : Seulement si l'autre a appuyé sur S2
-    if msg == b'CHANGE_COLOR':
-        color_index = (color_index + 1) % len(colors)
+            # Action : Seulement si l'autre a appuyé sur S2
+            if msg == CMD_COLOR:
+                color_index = (color_index + 1) % len(colors)
+        
+            # détection de flanc S1
+            if current_S1 == 0 and last_S1 != 0:
+                led_val = not led_val
+                LED.value(led_val)
     
-    # fonctionnement en mode remote
-    if is_remote_mode:
-        # détection de flanc
-        if current_S2 == 0 and last_S2 == 1:
-            try:
-                # envoi de l'ordre de changer la LED RGB de l'autre ESP
-                e.send(peer_bcast, b'CHANGE_COLOR', False)
-            # empeche de bloquer le code    
-            except OSError:
-                pass
-        # détection de flanc    
-        if current_S1 == 0 and last_S1 == 1:
-            led_val ^= 1
-            LED.value(led_val)
-        # Clignotement à 2 Hz
-        if time.ticks_diff(now, last_blink_time) > 250:
-            blink_state = not blink_state
-            
-            if blink_state :
-                rgb[0] = colors[color_index]
-            else:
-                rgb[0] = (0, 0, 0)
-                
-            rgb.write()
-            last_blink_time = now
-        # Vérification de la connexion et passe en mode local
-        if is_remote_mode and time.ticks_diff(now, last_rx_time) > connection_timeout:
-            is_remote_mode = False
-            print("Mode Local : Partenaire perdu")
-            current_color = colors[color_index]
-            rgb[0] = current_color
-            rgb.write()
-            print("LED fixée sur :", current_color)
-    # fonctionnement en mode local       
-    else:
-        # détection de flanc
-        if current_S1 == 0 and last_S1 == 1:
-            led_val ^= 1
-            LED.value(led_val)
-        # détection de flanc
-        if current_S2 == 0 and last_S2 == 1:
-            color_index = (color_index + 1) % len(colors)
-            rgb[0] = colors[color_index]
-            rgb.write()
-    # sauvgarde de l'ancien état des boutons    
-    last_S1 = current_S1    
-    last_S2 = current_S2
-    time.sleep_ms(1)
+            # fonctionnement en mode remote
+            if is_remote_mode:
+                # détection de flanc S2
+                if current_S2 == 0 and last_S2 != 0:
+                    try:
+                        e.send(peer_bcast, CMD_COLOR, False)
+                    except OSError:
+                        pass
+        
+                # Clignotement à 2 Hz
+                if time.ticks_diff(now, last_blink_time) > 250:
+                    blink_state = not blink_state
+                    if blink_state:
+                        rgb[0] = colors[color_index]
+                    else:
+                        rgb[0] = (0, 0, 0)
+                    rgb.write()
+                    last_blink_time = now
 
+                # Vérification du Timeout
+                if time.ticks_diff(now, last_rx_time) > connection_timeout:
+                    is_remote_mode = False
+                    print("Mode Local : Partenaire perdu")
+                    rgb[0] = colors[color_index]
+                    rgb.write()
+
+            # fonctionnement en mode local       
+            else:
+                if current_S2 == 0 and last_S2 != 0:
+                    color_index = (color_index + 1) % len(colors)
+                    rgb[0] = colors[color_index]
+                    rgb.write()
+    
+            # SAUVEGARDE de l'état (doit être DANS la boucle while)
+            last_S1 = current_S1    
+            last_S2 = current_S2
+            time.sleep_ms(1)
+
+    except KeyboardInterrupt:
+        print("Arrêt du script")
+        rgb[0] = (0, 0, 0)
+        rgb.write()
