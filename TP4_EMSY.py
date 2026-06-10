@@ -108,7 +108,7 @@ try:
                 rgb[0] = colors[color_index]
                 rgb.write()
 
-        # SAUVEGARDE de l'état (doit être DANS la boucle while)
+        # Sauvegarde de l'état actue des boutons
         last_S1 = current_S1    
         last_S2 = current_S2
         time.sleep_ms(1)
