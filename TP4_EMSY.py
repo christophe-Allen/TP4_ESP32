@@ -45,7 +45,6 @@ connection_timeout = 2000 # Retour au mode local après 2s sans signal
 rgb[0] = (0, 0, 0)
 rgb.write()
 
-if __name__ == "__main__":
     try:
         while True:
             now = time.ticks_ms()
